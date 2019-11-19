@@ -1,0 +1,19 @@
+{
+    "name": "siaoynli/laravel-webupload",
+    "description": "webupload for Laravel.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "siaoynli",
+            "email": "siaoynli@126.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Siaoynli\\LaravelWebUpload\\": "src/"
+        }
+    },
+    "require": {
+        "siaoynli/laravel-uploads": "^1.0"
+    }
+}

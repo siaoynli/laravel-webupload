@@ -1,0 +1,71 @@
+<?php
+/*
+* @Author: hzwlxy
+* @Email: 120235331@qq.com
+* @Github: http：//www.github.com/siaoynli
+* @Date: 2019/7/30 11:28
+* @Version:
+* @Description:
+*/
+
+namespace Siaoynli\LaravelWebUpload\Controllers;
+
+
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Siaoynli\LaravelWebUpload\Services\WebuploaderService;
+use  Siaoynli\Upload\Facades\Upload;
+use  Siaoynli\Image\Facades\Image;
+
+class  WebuploaderController extends Controller
+{
+
+    public function test()
+    {
+        return view("demo");
+    }
+
+    public function images()
+    {
+        $info = Upload::do();
+        $filename = $info["url"];
+        Image::file(".".$filename)->resize()->save();
+        return $info;
+    }
+
+    public function attaches()
+    {
+        $info = Upload::type("attach")->do();
+        return $info;
+    }
+
+    public function videos()
+    {
+        $info = Upload::type("video")->do();
+        return $info;
+    }
+
+
+    public function multi(Request $request, WebuploaderService $service)
+    {
+        if ($request->isMethod('post')) {
+            $action = request()->get('option');
+            switch ($action) {
+                case "hashCheck":
+                   return $service->checkFile();
+                case "chunkCheck":
+                    return $service->chunkCheck();
+                    break;
+                case "chunksMerge":
+                    return $service->chunksMerge();
+                    break;
+                default:
+                    return $service->chunkUpload();
+                    break;
+            }
+        }
+
+    }
+
+
+}
