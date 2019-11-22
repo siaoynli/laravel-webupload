@@ -32,12 +32,24 @@ class WebuploaderService
         $file = File::where("hash", $data["hash"])->first();
         if (!$file) return ["exist" => 0];
 
+        //文件不存在
+        if (!file_exists(storage_path("app" . $file->path))) {
 
-        $mimetype = Storage::disk('local')->mimeType($file->path);
+            File::where("hash", $data["hash"])->delete();
+            return ["exist" => 0];
+        }
+
+        //获取头信息失败
+        try {
+            $mimetype = Storage::disk('local')->mimeType($file->path);
+        } catch (\Exception $e) {
+            $mimetype = "";
+        }
 
         $arr = explode(".", $file->path);
 
-        return ["exist" => 1,
+        return [
+            "exist" => 1,
             "state" => "SUCCESS",
             "url" => $file->path,
             'original_name' => $original_name,
@@ -93,7 +105,6 @@ class WebuploaderService
             if ($file->getSize() > config("webuploader.multi_size")) {
                 Storage::disk('local')->deleteDirectory('multipart_upload/' . $uniqueFileName);
                 return ['state' => '上传文件大小超过限制'];
-
             }
             $original_name = $file->getClientOriginalName();
 
@@ -110,8 +121,6 @@ class WebuploaderService
             } else {
                 return ['chunked' => true, 'state' => 'SUCCESS'];
             }
-
-
         } else {
             return ['chunked' => false, 'state' => '文件上传失败'];
         }
@@ -181,8 +190,5 @@ class WebuploaderService
         return [
             'state' => '上传失败[文件分片对比错误]',
         ];
-
     }
-
-
 }
