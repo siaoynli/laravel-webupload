@@ -1,8 +1,7 @@
 var MultiUpload = (function() {
   var ELEM = ".mulitpart-upload-container",
     ratio = window.devicePixelRatio || 1,
-    thumbSize = 100 * ratio,
-    register = undefined;
+    thumbSize = 100 * ratio;
 
   var _options = {
     // 选完文件后，是否自动上传。
@@ -27,160 +26,168 @@ var MultiUpload = (function() {
     duplicate: true
   };
 
-  function initCreate(chooseBtn, options, callback) {
-    if (register === undefined) {
-      register = WebUploader.Uploader.register(
-        {
-          "before-send-file": "beforeSendFile",
-          "before-send": "beforeSend",
-          "after-send-file": "afterSendFile"
-        },
-        {
-          beforeSendFile: function(file) {
-            var owner = this.owner,
-              server = this.options.server,
-              task = new $.Deferred(),
-              obj = $("#" + file.id),
-              btn = obj.parents(ELEM).find("button");
+  function initCreate(btnObj, options, callback) {
+    window.obj[btnObj._name] = WebUploader;
 
-            obj
-              .find(".note")
-              .show()
-              .html("计算文件特征...");
-            obj.find("p.upload-state").hide();
+    window.obj[btnObj._name].Uploader.register(
+      {
+        "before-send-file": "beforeSendFile",
+        "before-send": "beforeSend",
+        "after-send-file": "afterSendFile"
+      },
+      {
+        beforeSendFile: function(file) {
+          if (this.options.pick.id != btnObj) {
+            return;
+          }
+          var owner = this.owner,
+            server = this.options.server,
+            task = new $.Deferred(),
+            obj = $("#" + file.id),
+            btn = obj.parents(ELEM).find("button");
 
-            owner
-              .md5File(file.source)
-              .fail(function() {
-                task.reject();
-              })
-              .progress(function(percentage) {
-                obj
-                  .find(".note")
-                  .text("读取进度" + parseInt(percentage * 100) + "%");
-              })
-              .then(function(md5Value) {
-                obj.find(".note").text("验证完毕...");
-                file.md5 = md5Value;
-                $.ajax(server, {
-                  dataType: "json",
-                  type: "post",
-                  data: {
-                    option: "hashCheck",
-                    hash: md5Value,
-                    name: file.name,
-                    size: file.size
-                  },
-                  cache: false,
-                  timeout: 1000
-                }).then(
-                  function(response, textStatus, jqXHR) {
-                    if (response.exist) {
-                      owner.skipFile(file);
-                      obj.find(".note").remove();
-                      obj
-                        .find("p.upload-state")
-                        .show()
-                        .attr("title", "正在上传")
-                        .html("100%");
-                      btn.html("开始上传");
-                      btn.removeClass("stop");
-                      btn.addClass("disabled");
-                      obj
-                        .parents(ELEM)
-                        .find(".webuploader-pick")
-                        .removeClass("disabled");
-                      task.reject();
+          obj
+            .find(".note")
+            .show()
+            .html("计算文件特征...");
+          obj.find("p.upload-state").hide();
 
-                      if (response.state === "SUCCESS") {
-                        var item = obj.find("p.upload-state");
-                        item.attr("title", "上传成功");
-                        item
-                          .removeClass("upload-state-error")
-                          .html('<i class="iconfont icon-check"></i>');
-                      }
+          owner
+            .md5File(file.source)
+            .fail(function() {
+              task.reject();
+            })
+            .progress(function(percentage) {
+              obj
+                .find(".note")
+                .text("读取进度" + parseInt(percentage * 100) + "%");
+            })
+            .then(function(md5Value) {
+              obj.find(".note").text("验证完毕...");
+              file.md5 = md5Value;
+              $.ajax(server, {
+                dataType: "json",
+                type: "post",
+                data: {
+                  option: "hashCheck",
+                  hash: md5Value,
+                  name: file.name,
+                  size: file.size
+                },
+                cache: false,
+                timeout: 1000
+              }).then(
+                function(response, textStatus, jqXHR) {
+                  if (response.exist) {
+                    owner.skipFile(file);
+                    obj.find(".note").remove();
+                    obj
+                      .find("p.upload-state")
+                      .show()
+                      .attr("title", "正在上传")
+                      .html("100%");
+                    btn.html("开始上传");
+                    btn.removeClass("stop");
+                    btn.addClass("disabled");
+                    obj
+                      .parents(ELEM)
+                      .find(".webuploader-pick")
+                      .removeClass("disabled");
+                    task.reject();
 
-                      callback(file, response);
-                    } else {
-                      task.resolve();
+                    if (response.state === "SUCCESS") {
+                      var item = obj.find("p.upload-state");
+                      item.attr("title", "上传成功");
+                      item
+                        .removeClass("upload-state-error")
+                        .html('<i class="iconfont icon-check"></i>');
                     }
-                  },
-                  function(jqXHR, textStatus, errorThrown) {
+
+                    callback(file, response);
+                  } else {
                     task.resolve();
                   }
-                );
-              });
-
-            return task.promise();
-          },
-          beforeSend: function(block) {
-            var task = new $.Deferred(),
-              server = this.options.server;
-            $.ajax({
-              type: "POST",
-              url: server,
-              data: {
-                option: "chunkCheck",
-                hash: block.file.md5,
-                chunk_index: block.chunk,
-                ext: block.file.ext,
-                size: block.end - block.start
-              },
-              cache: false,
-              async: false,
-              timeout: 1000, //todo 超时的话，只能认为该文件不曾上传过
-              dataType: "json"
-            }).then(
-              function(response, textStatus, jqXHR) {
-                if (response.exist) {
-                  task.reject();
-                } else {
+                },
+                function(jqXHR, textStatus, errorThrown) {
                   task.resolve();
                 }
-              },
-              function(jqXHR, textStatus, errorThrown) {
-                //任何形式的验证失败，都触发重新上传
+              );
+            });
+
+          return task.promise();
+        },
+        beforeSend: function(block) {
+          var task = new $.Deferred(),
+            server = this.options.server;
+          $.ajax({
+            type: "POST",
+            url: server,
+            data: {
+              option: "chunkCheck",
+              hash: block.file.md5,
+              chunk_index: block.chunk,
+              ext: block.file.ext,
+              size: block.end - block.start
+            },
+            cache: false,
+            async: false,
+            timeout: 1000, //todo 超时的话，只能认为该文件不曾上传过
+            dataType: "json"
+          }).then(
+            function(response, textStatus, jqXHR) {
+              if (response.exist) {
+                task.reject();
+              } else {
                 task.resolve();
               }
-            );
-            task.resolve();
-            return task.promise();
-          },
-          afterSendFile: function(file) {
-            var chunksTotal = Math.ceil(file.size / this.options.chunkSize),
-              deferred = WebUploader.Deferred(),
-              server = this.options.server;
-
-            $.ajax({
-              type: "POST",
-              url: server,
-              data: {
-                option: "chunksMerge",
-                hash: file.md5,
-                chunks: chunksTotal,
-                original_name: file.source.name,
-                ext: file.ext
-              },
-              cache: false,
-              async: false,
-              dataType: "json"
-            }).then(
-              function(response, textStatus, jqXHR) {
-                deferred.resolve();
-                callback(file, response);
-              },
-              function(jqXHR, textStatus, errorThrown) {
-                deferred.reject();
-              }
-            );
-            return deferred.promise();
+            },
+            function(jqXHR, textStatus, errorThrown) {
+              //任何形式的验证失败，都触发重新上传
+              task.resolve();
+            }
+          );
+          task.resolve();
+          return task.promise();
+        },
+        afterSendFile: function(file) {
+          if (this.options.pick.id != btnObj) {
+            return;
           }
+          var chunksTotal = Math.ceil(file.size / this.options.chunkSize),
+            deferred = WebUploader.Deferred(),
+            server = this.options.server;
+
+          $.ajax({
+            type: "POST",
+            url: server,
+            data: {
+              option: "chunksMerge",
+              hash: file.md5,
+              chunks: chunksTotal,
+              original_name: file.source.name,
+              ext: file.ext
+            },
+            cache: false,
+            async: false,
+            dataType: "json"
+          }).then(
+            function(response, textStatus, jqXHR) {
+              deferred.resolve();
+              callback(file, response);
+            },
+            function(jqXHR, textStatus, errorThrown) {
+              deferred.reject();
+            }
+          );
+          return deferred.promise();
         }
-      );
-    }
-    options.pick.id = chooseBtn;
+      }
+    );
+
+    options.pick.id = btnObj;
     Object.assign(_options, options);
-    return WebUploader.create(_options);
+    uploader = window.obj[btnObj._name];
+    return uploader.create(_options);
   }
 
   function uploadEvent(uploader, obj) {
@@ -396,8 +403,11 @@ var MultiUpload = (function() {
   }
 
   return {
-    init: function(options, picker, callback) {
+    upload: function(options, picker, callback) {
       var _this = $(ELEM).find(picker);
+      var func_arr = [];
+      _this._name = picker;
+      func_arr[picker] = callback;
       uploadEvent(initCreate(_this, options, callback), _this);
     }
   };

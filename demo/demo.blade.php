@@ -53,7 +53,7 @@
         };
 
         //上传成功后的回调，比如dom操作，地址写入隐藏表单
-        Upload.init(options,'.btn-file-picker', function (file, response) {
+        Upload.upload(options,'.btn-file-picker', function (file, response) {
 
         });
 
@@ -73,7 +73,7 @@
         };
 
         //上传后的回调，比如dom操作，地址写入隐藏表单
-        MultiUpload.init(options2,".btn-file-picker" function (file, response) {
+        MultiUpload.upload(options2,".btn-file-picker" function (file, response) {
                console.log(response);
 
                 if(response.state==="SUCCESS") {

@@ -224,7 +224,7 @@ var Upload = (function() {
   }
 
   return {
-    init: function(options, picker, callback) {
+    upload: function(options, picker, callback) {
       var _this = $(ELEM).find(picker);
       uploadEvent(initCreate(_this, options), _this, callback);
     }
