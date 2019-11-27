@@ -1,6 +1,7 @@
 var MultiUpload = (function() {
   var ELEM = ".mulitpart-upload-container",
     ratio = window.devicePixelRatio || 1,
+    _webUploader = WebUploader,
     thumbSize = 100 * ratio;
 
   var _options = {
@@ -27,9 +28,7 @@ var MultiUpload = (function() {
   };
 
   function initCreate(btnObj, options, callback) {
-    window.obj[btnObj._name] = WebUploader;
-
-    window.obj[btnObj._name].Uploader.register(
+    _webUploader.Uploader.register(
       {
         "before-send-file": "beforeSendFile",
         "before-send": "beforeSend",
@@ -186,8 +185,7 @@ var MultiUpload = (function() {
 
     options.pick.id = btnObj;
     Object.assign(_options, options);
-    uploader = window.obj[btnObj._name];
-    return uploader.create(_options);
+    return _webUploader.create(_options);
   }
 
   function uploadEvent(uploader, obj) {
@@ -405,9 +403,10 @@ var MultiUpload = (function() {
   return {
     upload: function(options, picker, callback) {
       var _this = $(ELEM).find(picker);
-      var func_arr = [];
+      if (_this.length > 1) {
+        console.error("上传实例有多个相同的class:" + picker);
+      }
       _this._name = picker;
-      func_arr[picker] = callback;
       uploadEvent(initCreate(_this, options, callback), _this);
     }
   };

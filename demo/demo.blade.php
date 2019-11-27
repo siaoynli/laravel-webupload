@@ -54,7 +54,15 @@
 
         //上传成功后的回调，比如dom操作，地址写入隐藏表单
         Upload.upload(options,'.btn-file-picker', function (file, response) {
+            console.log(file);
+                console.log(response);
 
+                if(response.state==="SUCCESS") {
+                    toastr.success('上传成功');
+                    $("#" + file.id).remove();
+                }else{
+                    toastr.error(response.state);
+                }
         });
 
 
@@ -74,10 +82,12 @@
 
         //上传后的回调，比如dom操作，地址写入隐藏表单
         MultiUpload.upload(options2,".btn-file-picker" function (file, response) {
-               console.log(response);
+                console.log(file);
+                console.log(response);
 
                 if(response.state==="SUCCESS") {
                     toastr.success('上传成功');
+                    $("#" + file.id).remove();
                 }else{
                     toastr.error(response.state);
                 }
