@@ -25,7 +25,7 @@
         <div class="mulitpart-upload-container">
             <div class="item-list"></div>
             <div class="upload-btns-group">
-                <div class="btn-file-picker">选择文件</div>
+                <div class="btn-file-picker2">选择文件</div>
                 <button class="disabled">分片上传</button>
             </div>
         </div>
@@ -81,7 +81,7 @@
         };
 
         //上传后的回调，比如dom操作，地址写入隐藏表单
-        MultiUpload.upload(options2,".btn-file-picker" function (file, response) {
+        MultiUpload.upload(options2,".btn-file-picker2", function (file, response) {
                 console.log(file);
                 console.log(response);
 
