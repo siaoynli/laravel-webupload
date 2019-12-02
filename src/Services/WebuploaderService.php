@@ -13,11 +13,27 @@ namespace Siaoynli\LaravelWebUpload\Services;
 use Illuminate\Support\Facades\Schema;
 use Siaoynli\LaravelWebUpload\Models\File;
 use Illuminate\Support\Facades\Storage;
+use Exception;
 
 class WebuploaderService
 {
     //方便临时文件排序
     private $chunkNum = 1000000000;
+    private $config;
+    private $disk = "local";
+
+
+
+    public function __construct()
+    {
+        $this->config = config("webuploader");
+        $this->disk = $this->config['disk'];
+        try {
+            $this->root = config("filesystems")["disks"][$this->disk]['root'];
+        } catch (Exception $e) {
+            throw  new Exception("请设置filesystems.php disk:" . $this->disk);
+        }
+    }
 
     public function checkFile()
     {
@@ -33,15 +49,14 @@ class WebuploaderService
         if (!$file) return ["exist" => 0];
 
         //文件不存在
-        if (!file_exists(storage_path("app" . $file->path))) {
-
+        if (!Storage::disk($this->disk)->exists($file->path)) {
             File::where("hash", $data["hash"])->delete();
             return ["exist" => 0];
         }
 
         //获取头信息失败
         try {
-            $mimetype = Storage::disk('local')->mimeType($file->path);
+            $mimetype = Storage::disk($this->disk)->mimeType($file->path);
         } catch (\Exception $e) {
             $mimetype = "";
         }
@@ -52,6 +67,7 @@ class WebuploaderService
             "exist" => 1,
             "state" => "SUCCESS",
             "url" => $file->path,
+            "disk_name" => $file->disk_name,
             'original_name' => $original_name,
             'ext' => end($arr),
             'mime' => $mimetype,
@@ -128,6 +144,9 @@ class WebuploaderService
 
     public function chunksMerge()
     {
+
+
+
         $store = request()->all();
         $ext = strtolower($store['ext']);
         $dir_name = $store['hash'];
@@ -163,24 +182,31 @@ class WebuploaderService
                 unset($handle);
             }
             fclose($fp);
-
             Storage::disk('local')->deleteDirectory('multipart_upload/' . $dir_name);
 
             $mimetype = Storage::disk('local')->mimeType($filename);
             $size = Storage::disk('local')->size($filename);
 
+            if ($this->disk != "local") {
+                if (!is_dir($this->root . '/' . dirname($filename))) {
+                    Storage::disk($this->disk)->makeDirectory($this->root . '/' . dirname($filename));
+                }
+                Storage::disk($this->disk)->put($filename, Storage::disk('local')->get($filename));
+                Storage::disk('local')->delete($filename);
+            }
 
             if (Schema::hasTable('files')) {
                 //写入表
                 $data["hash"] = $store['hash'];
                 $data["path"] = $filename;
-
+                $data["disk_name"] = $this->disk;
                 File::firstOrCreate($data);
             }
             return [
                 'state' => 'SUCCESS',
                 'original_name' => $original_name,
                 'ext' => $ext,
+                'disk_name' => $this->disk,
                 'mime' => $mimetype,
                 'size' => $size,
                 'url' => $filename,  //文件存放路径

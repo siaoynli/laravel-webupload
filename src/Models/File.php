@@ -11,7 +11,6 @@ class File extends Model
     protected $fillable = [
         'hash',
         'path',
+        'disk_name',
     ];
-
-
 }

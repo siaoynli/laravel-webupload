@@ -19,32 +19,39 @@ use  Siaoynli\Image\Facades\Image;
 
 class  WebuploaderController extends Controller
 {
+    private $disk = "";
+
+    public function __construct()
+    {
+        $this->config = config("webuploader");
+        $this->disk = $this->config['disk'];
+    }
 
     public function test()
     {
-        if(!env("APP_DEBUG",false)) {
-          abort(404);
+        if (!env("APP_DEBUG", false)) {
+            abort(404);
         }
         return view("demo");
     }
 
     public function images()
     {
-        $info = Upload::do();
+        $info = Upload::disk($this->disk)->do();
         $filename = $info["url"];
-        Image::file(".".$filename)->resize()->save();
+        Image::file("." . $filename)->resize()->save();
         return $info;
     }
 
     public function attaches()
     {
-        $info = Upload::type("attach")->do();
+        $info = Upload::disk($this->disk)->type("attach")->do();
         return $info;
     }
 
     public function videos()
     {
-        $info = Upload::type("video")->do();
+        $info = Upload::disk($this->disk)->type("video")->do();
         return $info;
     }
 
@@ -55,7 +62,7 @@ class  WebuploaderController extends Controller
             $action = request()->get('option');
             switch ($action) {
                 case "hashCheck":
-                   return $service->checkFile();
+                    return $service->checkFile();
                 case "chunkCheck":
                     return $service->chunkCheck();
                     break;
@@ -67,8 +74,5 @@ class  WebuploaderController extends Controller
                     break;
             }
         }
-
     }
-
-
 }

@@ -16,9 +16,10 @@ return [
             "videos" => "webuploader/videos",
             "multi" => "webuploader/multi",
         ],
-        "middleware" => [
-        ]
+        "middleware" => []
     ],
+    //filesystem disks name
+    'disk' => 'public',
     //分片上传限制后缀
     "multi_ext" => [
         "mp4",
@@ -26,5 +27,5 @@ return [
         "rar",
         "jpg"
     ],
-    "multi_size" => 1024*1024*2000, //2g
+    "multi_size" => 1024 * 1024 * 2000, //2g
 ];

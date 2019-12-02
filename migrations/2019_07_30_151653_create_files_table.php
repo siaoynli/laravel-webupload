@@ -17,6 +17,7 @@ class CreateFilesTable extends Migration
             $table->bigIncrements('id');
             $table->string('hash')->unique()->comment("文件hash值");
             $table->string('path')->index()->comment("文件路径");
+            $table->string('disk_name')->index()->comment("disk名字");
             $table->timestamps();
         });
     }
