@@ -21,6 +21,7 @@ class WebuploaderService
     private $chunkNum = 1000000000;
     private $config;
     private $disk = "local";
+    private $root = "";
 
 
 
@@ -28,10 +29,12 @@ class WebuploaderService
     {
         $this->config = config("webuploader");
         $this->disk = $this->config['disk'];
-        try {
-            $this->root = config("filesystems")["disks"][$this->disk]['root'];
-        } catch (Exception $e) {
-            throw  new Exception("请设置filesystems.php disk:" . $this->disk);
+        if ($this->disk) {
+            try {
+                $this->root = config("filesystems")["disks"][$this->disk]['root'];
+            } catch (Exception $e) {
+                throw  new Exception("请设置filesystems.php disk:" . $this->disk);
+            }
         }
     }
 
@@ -187,7 +190,7 @@ class WebuploaderService
             $mimetype = Storage::disk('local')->mimeType($filename);
             $size = Storage::disk('local')->size($filename);
 
-            if ($this->disk != "local") {
+            if ($this->disk && $this->disk != "local") {
                 if (!is_dir($this->root . '/' . dirname($filename))) {
                     Storage::disk($this->disk)->makeDirectory($this->root . '/' . dirname($filename));
                 }

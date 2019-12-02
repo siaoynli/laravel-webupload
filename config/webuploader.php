@@ -18,8 +18,8 @@ return [
         ],
         "middleware" => []
     ],
-    //filesystem disks name
-    'disk' => 'public',
+    //filesystem disks name ,如果为空，则上传到public目录
+    'disk' => '',
     //分片上传限制后缀
     "multi_ext" => [
         "mp4",
