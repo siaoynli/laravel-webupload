@@ -157,6 +157,7 @@ var Upload = (function() {
     uploader.onUploadSuccess = function(file, response) {
       //服务器端返回的上传
       var $obj = $("#" + file.id);
+
       var $item = $obj.find("p.upload-state");
       if (response.state === "SUCCESS") {
         $item.attr("title", "上传成功");
@@ -174,7 +175,8 @@ var Upload = (function() {
             .html('<i class="iconfont icon-close"></i>');
         }
       }
-      callback(response);
+
+      callback(file, response);
     };
 
     //上传失败
@@ -226,6 +228,9 @@ var Upload = (function() {
   return {
     upload: function(options, picker, callback) {
       var _this = $(ELEM).find(picker);
+      if (_this.length > 1) {
+        console.error("上传实例有多个相同的class:" + picker);
+      }
       uploadEvent(initCreate(_this, options), _this, callback);
     }
   };

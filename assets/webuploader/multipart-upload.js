@@ -335,6 +335,7 @@ var MultiUpload = (function() {
     uploader.onUploadSuccess = function(file, response) {
       var $obj = $("#" + file.id);
       var $item = $obj.find("p.upload-state");
+
       if (response.state === "SUCCESS") {
         $item.attr("title", "上传成功");
         $item
