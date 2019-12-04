@@ -15,6 +15,6 @@
     },
     "require": {
         "siaoynli/laravel-uploads": "^1.0",
-        "siaoynli/laravel-images": "^1.0"
+        "siaoynli/laravel-images": "^1.0",
     }
 }

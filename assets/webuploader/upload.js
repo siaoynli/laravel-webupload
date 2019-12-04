@@ -1,4 +1,4 @@
-var Upload = (function() {
+var Upload = (function () {
   var ELEM = ".upload-container";
 
   var ratio = window.devicePixelRatio || 1,
@@ -29,17 +29,17 @@ var Upload = (function() {
     }
   };
 
-  function initCreate(chooseBtn, options) {
+  function initCreate (chooseBtn, options) {
     options.pick.id = chooseBtn;
     Object.assign(_options, options);
     return WebUploader.create(_options);
   }
 
-  function uploadEvent(uploader, obj, callback) {
+  function uploadEvent (uploader, obj, callback) {
     var $list = obj.parents(ELEM).find(".item-list");
     var btn = obj.parents(ELEM).find("button");
 
-    btn.on("click", function() {
+    btn.on("click", function () {
       if (btn.hasClass("disabled")) {
         return;
       }
@@ -54,7 +54,7 @@ var Upload = (function() {
     });
 
     //加入队列
-    uploader.onFileQueued = function(file) {
+    uploader.onFileQueued = function (file) {
       //已经上传之后，不能再添加
 
       if (obj.find(".webuploader-pick").hasClass("disabled")) {
@@ -63,16 +63,16 @@ var Upload = (function() {
       }
 
       var $li = $(
-          '<div id="' +
-            file.id +
-            '" class="file-item" style="width:' +
-            thumbSize +
-            "px;height:" +
-            thumbSize +
-            'px">' +
-            '<img alt=""><p class="upload-state" ><i class="iconfont icon-cloud-upload"></i></p>' +
-            "</div>"
-        ),
+        '<div id="' +
+        file.id +
+        '" class="file-item" style="width:' +
+        thumbSize +
+        "px;height:" +
+        thumbSize +
+        'px">' +
+        '<img alt=""><p class="upload-state" ><i class="iconfont icon-cloud-upload"></i></p>' +
+        "</div>"
+      ),
         $img = $li.find("img");
       // $list为容器jQuery实例
       $list.append($li);
@@ -81,7 +81,7 @@ var Upload = (function() {
       // thumbnailWidth x thumbnailHeight 为 100 x 100
       this.makeThumb(
         file,
-        function(error, src) {
+        function (error, src) {
           if (error) {
             $img.replaceWith(
               '<div class="item-cover"><i class="iconfont icon-file-unknown"></i></div>'
@@ -96,15 +96,15 @@ var Upload = (function() {
     };
 
     //一堆文件加入队列
-    uploader.onFilesQueued = function(files) {
+    uploader.onFilesQueued = function (files) {
       //todo...
     };
 
     //当文件被移除队列后触发
-    uploader.onFileDequeued = function(file) {};
+    uploader.onFileDequeued = function (file) { };
 
     //上传之前
-    uploader.onBeforeFileQueued = function(file) {
+    uploader.onBeforeFileQueued = function (file) {
       //移除上传禁止样式
       btn.removeClass("disabled");
       if (!this.options.pick.multiple) {
@@ -120,7 +120,7 @@ var Upload = (function() {
     };
 
     //当开始上传流程时触发
-    uploader.onStartUpload = function() {
+    uploader.onStartUpload = function () {
       obj.find(".webuploader-pick").addClass("disabled");
       if (btn && !btn.hasClass("disabled")) {
         btn.html("暂停");
@@ -129,19 +129,19 @@ var Upload = (function() {
     };
 
     //暂停
-    uploader.onStopUpload = function() {};
+    uploader.onStopUpload = function () { };
 
     //上传进度
-    uploader.onUploadProgress = function(file, percentage) {
+    uploader.onUploadProgress = function (file, percentage) {
       var $li = $("#" + file.id),
         $percent = $li.find(".progress .progress-bar");
       // 避免重复创建
       if (!$percent.length) {
         $percent = $(
           '<div class="progress progress-striped active">' +
-            '<div class="progress-bar" role="progressbar" style="width: 0%">' +
-            "</div>" +
-            "</div>"
+          '<div class="progress-bar" role="progressbar" style="width: 0%">' +
+          "</div>" +
+          "</div>"
         )
           .appendTo($li)
           .find(".progress-bar");
@@ -154,20 +154,18 @@ var Upload = (function() {
     };
 
     //上传成功
-    uploader.onUploadSuccess = function(file, response) {
+    uploader.onUploadSuccess = function (file, response) {
       //服务器端返回的上传
       var $obj = $("#" + file.id);
 
       var $item = $obj.find("p.upload-state");
       if (response.state === "SUCCESS") {
         $item.attr("title", "上传成功");
-        toastr.success("上传成功");
         $item
           .removeClass("upload-state-error")
           .html('<i class="iconfont icon-check"></i>');
       } else {
         $item.attr("title", response.state);
-        toastr.error(response.state);
         var $error = $obj.find("p.upload-state-error");
         if (!$error.length) {
           $item
@@ -180,7 +178,7 @@ var Upload = (function() {
     };
 
     //上传失败
-    uploader.onUploadError = function(file) {
+    uploader.onUploadError = function (file) {
       var $obj = $("#" + file.id);
       var $item = $obj.find("p.upload-state");
       var $error = $obj.find("p.upload-state-error");
@@ -193,14 +191,14 @@ var Upload = (function() {
     };
 
     //不管成功或者失败，文件上传完成时触发
-    uploader.onUploadComplete = function(file) {
+    uploader.onUploadComplete = function (file) {
       $("#" + file.id)
         .find(".progress")
         .fadeOut();
     };
 
     //所有文件上传结束
-    uploader.onUploadFinished = function() {
+    uploader.onUploadFinished = function () {
       if (btn) {
         btn.html("开始上传");
         btn.removeClass("stop");
@@ -210,7 +208,7 @@ var Upload = (function() {
       uploader.reset();
     };
 
-    uploader.onError = function(type, handler) {
+    uploader.onError = function (type, handler) {
       console.log(type);
       if (type === "Q_TYPE_DENIED") {
         //提示信息
@@ -226,7 +224,7 @@ var Upload = (function() {
   }
 
   return {
-    upload: function(options, picker, callback) {
+    upload: function (options, picker, callback) {
       var _this = $(ELEM).find(picker);
       if (_this.length > 1) {
         console.error("上传实例有多个相同的class:" + picker);
