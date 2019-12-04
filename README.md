@@ -35,8 +35,9 @@ php artisan migrate
 依赖:siaoynli/laravel-uploads https://github.com/siaoynli/laravel-uploads      
  siaoynli/laravel-images https://github.com/siaoynli/laravel-images 
 
-分片上传文件存放到storage/app/upload/files目录
-大文件一般上传到oss，如需外部访问，请使用软连接指向 storage/app/upload/files目录
+分片上传文件默认存放到storage/app/upload/files目录
+
+也可以指定disk 名字，直接都上传到指定disk目录
 
 普通上传根据 config/upload.php 配置来配置，添加水印，裁剪图片等
 
