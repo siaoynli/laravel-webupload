@@ -175,8 +175,13 @@ class WebuploaderService
         if (count($files) == $chunks) {
             sort($files);
 
-            $fp = fopen(storage_path('app/') . $filename, "ab");
-
+            try {
+                $fp = fopen(storage_path('app/') . $filename, "ab");
+            } catch (\Exception $e) {
+                return [
+                    'state' => '上传失败,' . storage_path('app/') . '目录不可写',
+                ];
+            }
             foreach ($files as $file) {
                 $tempFile = storage_path('app/' . $file);
                 $handle = fopen($tempFile, "rb");
