@@ -52,14 +52,24 @@ class WebuploaderService
         if (!$file) return ["exist" => 0];
 
         //文件不存在
-        if ($this->disk && !Storage::disk($this->disk)->exists($file->path)) {
-            File::where("hash", $data["hash"])->delete();
-            return ["exist" => 0];
+
+        $disk_name=$file->disk_name;
+        if($disk_name) {
+            if ( !Storage::disk($disk_name)->exists($file->path)) {
+                File::where("hash", $data["hash"])->delete();
+                return ["exist" => 0];
+            }
+        }else{
+            $disk_name="local";
+            if ( !Storage::disk("local")->exists($file->path)) {
+                File::where("hash", $data["hash"])->delete();
+                return ["exist" => 0];
+            }
         }
 
         //获取头信息失败
         try {
-            $mimetype = Storage::disk($this->disk)->mimeType($file->path);
+            $mimetype = Storage::disk($disk_name)->mimeType($file->path);
         } catch (\Exception $e) {
             $mimetype = "";
         }
@@ -70,7 +80,7 @@ class WebuploaderService
             "exist" => 1,
             "state" => "SUCCESS",
             "url" => $file->path,
-            "disk_name" => $file->disk_name,
+            "disk_name" => $disk_name,
             'original_name' => $original_name,
             'ext' => end($arr),
             'mime' => $mimetype,
@@ -174,14 +184,14 @@ class WebuploaderService
 
         if (count($files) == $chunks) {
             sort($files);
-
             try {
                 $fp = fopen(storage_path('app/') . $filename, "ab");
-            } catch (\Exception $e) {
+            }catch (\Exception $e) {
                 return [
-                    'state' => '上传失败,' . storage_path('app/') . '目录不可写',
+                    'state' => '上传失败,'.storage_path('app/').'目录不可写',
                 ];
             }
+
             foreach ($files as $file) {
                 $tempFile = storage_path('app/' . $file);
                 $handle = fopen($tempFile, "rb");
@@ -207,14 +217,14 @@ class WebuploaderService
                 //写入表
                 $data["hash"] = $store['hash'];
                 $data["path"] = $filename;
-                $data["disk_name"] = $this->disk;
+                $data["disk_name"] = $this->disk?:"local";
                 File::firstOrCreate($data);
             }
             return [
                 'state' => 'SUCCESS',
                 'original_name' => $original_name,
                 'ext' => $ext,
-                'disk_name' => $this->disk,
+                'disk_name' => $this->disk?:"local",
                 'mime' => $mimetype,
                 'size' => $size,
                 'url' => $filename,  //文件存放路径
