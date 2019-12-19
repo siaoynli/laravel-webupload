@@ -52,7 +52,7 @@ class WebuploaderService
         if (!$file) return ["exist" => 0];
 
         //文件不存在
-        if (!Storage::disk($this->disk)->exists($file->path)) {
+        if ($this->disk && !Storage::disk($this->disk)->exists($file->path)) {
             File::where("hash", $data["hash"])->delete();
             return ["exist" => 0];
         }
