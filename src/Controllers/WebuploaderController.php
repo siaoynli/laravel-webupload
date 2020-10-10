@@ -25,6 +25,7 @@ class  WebuploaderController extends Controller
     {
         $this->config = config("webuploader");
         $this->disk = $this->config['disk'];
+
     }
 
     public function test()

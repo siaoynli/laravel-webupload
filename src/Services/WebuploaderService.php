@@ -20,20 +20,19 @@ class WebuploaderService
     //方便临时文件排序
     private $chunkNum = 1000000000;
     private $config;
-    private $disk = "local";
+    private $multi_disk = "";
     private $root = "";
-
 
 
     public function __construct()
     {
         $this->config = config("webuploader");
-        $this->disk = $this->config['disk'];
-        if ($this->disk) {
+        $this->multi_disk = $this->config['multi_disk'];
+        if ($this->multi_disk) {
             try {
-                $this->root = config("filesystems")["disks"][$this->disk]['root'];
+                $this->root = config("filesystems")["disks"][$this->multi_disk]['root'];
             } catch (Exception $e) {
-                throw  new Exception("请设置filesystems.php disk:" . $this->disk);
+                throw  new Exception("请设置filesystems.php disk:" . $this->multi_disk);
             }
         }
     }
@@ -53,15 +52,15 @@ class WebuploaderService
 
         //文件不存在
 
-        $disk_name=$file->disk_name;
-        if($disk_name) {
-            if ( !Storage::disk($disk_name)->exists($file->path)) {
+        $disk_name = $file->disk_name;
+        if ($disk_name) {
+            if (!Storage::disk($disk_name)->exists($file->path)) {
                 File::where("hash", $data["hash"])->delete();
                 return ["exist" => 0];
             }
-        }else{
-            $disk_name="local";
-            if ( !Storage::disk("local")->exists($file->path)) {
+        } else {
+            $disk_name = "local";
+            if (!Storage::disk("local")->exists($file->path)) {
                 File::where("hash", $data["hash"])->delete();
                 return ["exist" => 0];
             }
@@ -159,7 +158,6 @@ class WebuploaderService
     {
 
 
-
         $store = request()->all();
         $ext = strtolower($store['ext']);
         $dir_name = $store['hash'];
@@ -186,9 +184,9 @@ class WebuploaderService
             sort($files);
             try {
                 $fp = fopen(storage_path('app/') . $filename, "ab");
-            }catch (\Exception $e) {
+            } catch (\Exception $e) {
                 return [
-                    'state' => '上传失败,'.storage_path('app/').'目录不可写',
+                    'state' => '上传失败,' . storage_path('app/') . '目录不可写',
                 ];
             }
 
@@ -205,11 +203,23 @@ class WebuploaderService
             $mimetype = Storage::disk('local')->mimeType($filename);
             $size = Storage::disk('local')->size($filename);
 
-            if ($this->disk && $this->disk != "local") {
+            if ($this->multi_disk && $this->multi_disk != "local") {
                 if (!is_dir($this->root . '/' . dirname($filename))) {
-                    Storage::disk($this->disk)->makeDirectory($this->root . '/' . dirname($filename));
+                    Storage::disk($this->multi_disk)->makeDirectory($this->root . '/' . dirname($filename));
                 }
-                Storage::disk($this->disk)->put($filename, Storage::disk('local')->get($filename));
+                Storage::disk($this->multi_disk)->put($filename, Storage::disk('local')->get($filename));
+                Storage::disk('local')->delete($filename);
+            }
+            if ($this->multi_disk == "") {
+                $dir = dirname(public_path($filename));
+                if (!is_dir($dir)) {
+                    try {
+                        mkdir($dir, 0777, true);
+                    } catch (\Exception $e) {
+                        throw  new Exception($dir . "目录不可写");
+                    }
+                }
+                copy(storage_path("app" . $filename), public_path($filename));
                 Storage::disk('local')->delete($filename);
             }
 
@@ -217,14 +227,14 @@ class WebuploaderService
                 //写入表
                 $data["hash"] = $store['hash'];
                 $data["path"] = $filename;
-                $data["disk_name"] = $this->disk?:"local";
+                $data["disk_name"] = $this->disk ?: "local";
                 File::firstOrCreate($data);
             }
             return [
                 'state' => 'SUCCESS',
                 'original_name' => $original_name,
                 'ext' => $ext,
-                'disk_name' => $this->disk?:"local",
+                'disk_name' => $this->disk ?: "local",
                 'mime' => $mimetype,
                 'size' => $size,
                 'url' => $filename,  //文件存放路径
