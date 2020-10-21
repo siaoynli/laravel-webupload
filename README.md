@@ -27,7 +27,7 @@ php artisan vendor:publish --provider='Siaoynli\LaravelWebUpload\LaravelWebUploa
 php artisan migrate
 ```
 
-3.输入http:://localhost/webuploader/test 进行测试
+3.输入http:://localhost/webuploader/demo 进行测试
 
 # 说明
 
