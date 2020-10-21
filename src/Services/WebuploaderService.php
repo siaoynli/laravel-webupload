@@ -126,7 +126,7 @@ class WebuploaderService
         if ($file->isValid()) {
             $ext = strtolower($file->getClientOriginalExtension());
 
-            $allow = !in_array($ext, config("webuploader.extensions.image")) || !in_array($ext, config("webuploader.extensions.video")) || !in_array($ext, config("webuploader.extensions.attach"));
+            $allow = !in_array($ext, config("webuploader.extensions.image")) && !in_array($ext, config("webuploader.extensions.video")) && !in_array($ext, config("webuploader.extensions.attach"));
 
             if ($allow) {
                 Storage::disk('local')->deleteDirectory('multipart_upload/' . $uniqueFileName);
