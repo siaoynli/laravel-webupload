@@ -22,6 +22,7 @@ class WebuploaderService
     private $config;
     private $multi_disk = "";
     private $root = "";
+    private $file_type = "image";
 
 
     public function __construct()
@@ -125,7 +126,9 @@ class WebuploaderService
         if ($file->isValid()) {
             $ext = strtolower($file->getClientOriginalExtension());
 
-            if (!in_array($ext, config("webuploader.multi_ext"))) {
+            $allow = !in_array($ext, config("webuploader.extensions.image")) || !in_array($ext, config("webuploader.extensions.video")) || !in_array($ext, config("webuploader.extensions.attach"));
+
+            if ($allow) {
                 Storage::disk('local')->deleteDirectory('multipart_upload/' . $uniqueFileName);
                 return ['state' => '不允许上传的类型'];
             }
@@ -157,7 +160,6 @@ class WebuploaderService
     public function chunksMerge()
     {
 
-
         $store = request()->all();
         $ext = strtolower($store['ext']);
         $dir_name = $store['hash'];
@@ -165,7 +167,20 @@ class WebuploaderService
 
         $original_name = $store['original_name'];
 
-        $path = '/uploads/files/' . date('Y-m-d');
+        if (in_array($ext, config("webuploader.extensions.image"))) {
+            $this->file_type = "image";
+        }
+
+        if (in_array($ext, config("webuploader.extensions.video"))) {
+            $this->file_type = "video";
+        }
+
+        if (in_array($ext, config("webuploader.extensions.attach"))) {
+            $this->file_type = "attach";
+        }
+
+
+        $path = '/uploads/' . $this->file_type . '/' . date('Y-m-d');
 
         if (!is_dir(storage_path('app/' . $path))) {
             Storage::makeDirectory($path);

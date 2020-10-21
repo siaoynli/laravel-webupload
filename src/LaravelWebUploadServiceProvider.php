@@ -56,7 +56,9 @@ class LaravelWebUploadServiceProvider extends ServiceProvider
     {
         if (!$this->app->routesAreCached()) {
             $router->group(['namespace' => __NAMESPACE__.'\\Controllers', "middleware" => config('webuploader.route.middleware', [])], function ($router) {
-                $router->get( '/webuploader/test', 'WebuploaderController@test')->name('webuploader.test');
+                if (env("APP_DEBUG", false)) {
+                    $router->get( '/webuploader/demo', 'WebuploaderController@demo')->name('webuploader.demo');
+                }
                 $router->post(config('webuploader.route.uri.images', '/webuploader/images'), 'WebuploaderController@images')->name('webuploader.images');
                 $router->post(config('webuploader.route.uri.attaches', '/webuploader/attaches'), 'WebuploaderController@attaches')->name('webuploader.attaches');
                 $router->post(config('webuploader.route.uri.videos', '/webuploader/videos'), 'WebuploaderController@videos')->name('webuploader.videos');

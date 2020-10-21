@@ -28,11 +28,9 @@ class  WebuploaderController extends Controller
 
     }
 
-    public function test()
+    public function demo()
     {
-        if (!env("APP_DEBUG", false)) {
-            abort(404);
-        }
+
         return view("demo");
     }
 

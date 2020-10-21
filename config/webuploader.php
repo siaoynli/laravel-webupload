@@ -21,11 +21,31 @@ return [
     //filesystem disks name ,如果为空，则上传到public目录
     'disk' => '',
     //分片上传限制后缀
-    "multi_ext" => [
-        "mp4",
-        "zip",
-        "rar",
-        "jpg"
+    "extensions" => [
+        "image" => [
+            "jpg",
+            "jpeg",
+            "png",
+            "bmp",
+            "gif"
+        ],
+        "video" => [
+            "mp4",
+            "flv",
+            "mkv",
+            "avi"
+        ],
+        "attach" => [
+            "zip",
+            "rar",
+            "doc",
+            "txt",
+            "pdf",
+            "docx",
+            "xls",
+            "xlsx",
+            "xlt",
+        ],
     ],
     "multi_size" => 1024 * 1024 * 2000, //2g
 ];
