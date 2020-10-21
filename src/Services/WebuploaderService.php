@@ -18,11 +18,11 @@ use Exception;
 class WebuploaderService
 {
     //方便临时文件排序
-    private $chunkNum = 1000000000;
-    private $config;
-    private $multi_disk = "";
-    private $root = "";
-    private $file_type = "files";
+    protected $chunkNum = 1000000000;
+    protected $config;
+    protected $multi_disk = "";
+    protected $root = "";
+    protected $file_type = "files";
 
 
     public function __construct()
