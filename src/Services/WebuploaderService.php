@@ -22,7 +22,7 @@ class WebuploaderService
     private $config;
     private $multi_disk = "";
     private $root = "";
-    private $file_type = "image";
+    private $file_type = "files";
 
 
     public function __construct()
@@ -168,15 +168,15 @@ class WebuploaderService
         $original_name = $store['original_name'];
 
         if (in_array($ext, config("webuploader.extensions.image"))) {
-            $this->file_type = "image";
+            $this->file_type = "images";
         }
 
         if (in_array($ext, config("webuploader.extensions.video"))) {
-            $this->file_type = "video";
+            $this->file_type = "videos";
         }
 
         if (in_array($ext, config("webuploader.extensions.attach"))) {
-            $this->file_type = "attach";
+            $this->file_type = "attachs";
         }
 
 
@@ -242,14 +242,14 @@ class WebuploaderService
                 //写入表
                 $data["hash"] = $store['hash'];
                 $data["path"] = $filename;
-                $data["disk_name"] = $this->disk ?: "local";
+                $data["disk_name"] = $this->multi_disk ?: "local";
                 File::firstOrCreate($data);
             }
             return [
                 'state' => 'SUCCESS',
                 'original_name' => $original_name,
                 'ext' => $ext,
-                'disk_name' => $this->disk ?: "local",
+                'disk_name' => $this->multi_disk ?: "local",
                 'mime' => $mimetype,
                 'size' => $size,
                 'url' => $filename,  //文件存放路径
