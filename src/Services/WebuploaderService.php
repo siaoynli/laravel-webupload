@@ -116,14 +116,10 @@ class WebuploaderService
 
         $file = request()->file("file");
         $chunk = request()->get('chunk', 0);
-        $chunks = request()->get('chunks', 1);
         $isMultiUpload = $uniqueFileName = request()->get('hash', false);
-
-
         if (!$file) {
             return ['state' => '上传失败'];
         }
-
 
         if ($file->isValid()) {
             $ext = strtolower($file->getClientOriginalExtension());
