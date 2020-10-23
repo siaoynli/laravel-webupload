@@ -116,16 +116,13 @@ class WebuploaderService
 
         $file = request()->file("file");
         $chunk = request()->get('chunk', 0);
-        $chunks = request()->get('chunks', 0);
-        $uniqueFileName = request()->get('hash', 0);
+        $chunks = request()->get('chunks', 1);
+        $isMultiUpload = $uniqueFileName = request()->get('hash', false);
 
 
         if (!$file) {
             return ['state' => '上传失败'];
         }
-
-        //如果没有hash标志，说明不是分片上传
-        $isMultiUpload = $uniqueFileName != 0;
 
 
         if ($file->isValid()) {
