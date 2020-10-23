@@ -162,17 +162,8 @@ class WebuploaderService
             $tempArr = explode(".", $original_name);
             $ext = end($tempArr);
 
-            if (in_array($ext, config("webuploader.extensions.image"))) {
-                $this->file_type = "images";
-            }
+            $this->getFileType($ext);
 
-            if (in_array($ext, config("webuploader.extensions.video"))) {
-                $this->file_type = "videos";
-            }
-
-            if (in_array($ext, config("webuploader.extensions.attach"))) {
-                $this->file_type = "attachs";
-            }
             $path = '/uploads/' . $this->file_type . '/' . date('Y-m-d');
             $filename = $path . '/' . md5(uniqid()) . '.' . $ext;
             $disk = $this->config['disk'];
@@ -213,17 +204,7 @@ class WebuploaderService
 
         $original_name = $store['original_name'];
 
-        if (in_array($ext, config("webuploader.extensions.image"))) {
-            $this->file_type = "images";
-        }
-
-        if (in_array($ext, config("webuploader.extensions.video"))) {
-            $this->file_type = "videos";
-        }
-
-        if (in_array($ext, config("webuploader.extensions.attach"))) {
-            $this->file_type = "attachs";
-        }
+        $this->getFileType($ext);
 
 
         $path = '/uploads/' . $this->file_type . '/' . date('Y-m-d');
@@ -306,4 +287,21 @@ class WebuploaderService
             'state' => '上传失败[文件分片对比错误]',
         ];
     }
+
+    private function getFileType($ext)
+    {
+        if (in_array($ext, config("webuploader.extensions.image"))) {
+            $this->file_type = "images";
+        }
+
+        if (in_array($ext, config("webuploader.extensions.video"))) {
+            $this->file_type = "videos";
+        }
+
+        if (in_array($ext, config("webuploader.extensions.attach"))) {
+            $this->file_type = "attachs";
+        }
+
+    }
+
 }
