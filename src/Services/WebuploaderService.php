@@ -151,11 +151,12 @@ class WebuploaderService
                 }
 
                 Storage::disk('local')->put($dir_name . '/' . ($this->chunkNum + $chunk), file_get_contents($realPath));
-                if ($chunks == ($chunk + 1)) {
-                    return ['chunked' => true, 'state' => 'SUCCESS', 'ext' => $ext, 'original' => $original_name];
-                } else {
-                    return ['chunked' => true, 'state' => 'SUCCESS'];
-                }
+                return ['chunked' => true, 'state' => 'SUCCESS'];
+//                if ($chunks == ($chunk + 1)) {
+//                    return ['chunked' => true, 'state' => 'SUCCESS', 'ext' => $ext, 'original' => $original_name];
+//                } else {
+//                    return ['chunked' => true, 'state' => 'SUCCESS'];
+//                }
             }
             //非分片上传
             $tempArr = explode(".", $original_name);
