@@ -52,7 +52,8 @@ var MultiUpload = (function () {
                     obj.find("p.upload-state").hide();
 
                     owner
-                        .md5File(file, 0, 10 * 1024 * 1024)
+                        .md5File(file.source)
+                        // .md5File(file, 0, 10 * 1024 * 1024)
                         .fail(function () {
                             task.reject();
                         })
