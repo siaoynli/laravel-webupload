@@ -18,7 +18,7 @@ use Exception;
 class WebuploaderService
 {
     //方便临时文件排序
-    protected $chunkNum = 1000000000;
+    protected $chunkNum = 100000000000;
     protected $config;
     protected $multi_disk = "";
     protected $root = "";
@@ -115,13 +115,18 @@ class WebuploaderService
     {
 
         $file = request()->file("file");
-        $chunk = request()->get('chunk');
-        $chunks = request()->get('chunks');
-        $uniqueFileName = request()->get('hash');
+        $chunk = request()->get('chunk', 0);
+        $chunks = request()->get('chunks', 0);
+        $uniqueFileName = request()->get('hash', 0);
+
 
         if (!$file) {
             return ['state' => '上传失败'];
         }
+
+        //如果没有hash标志，说明不是分片上传
+        $isMultiUpload = $uniqueFileName != 0;
+
 
         if ($file->isValid()) {
             $ext = strtolower($file->getClientOriginalExtension());
@@ -140,20 +145,63 @@ class WebuploaderService
             $original_name = $file->getClientOriginalName();
 
             $realPath = $file->getRealPath();
-            $dir_name = 'multipart_upload/' . $uniqueFileName;
 
-            if (!is_dir(storage_path($dir_name))) {
-                Storage::disk('local')->makeDirectory($dir_name);
+            if ($isMultiUpload) {
+                $dir_name = 'multipart_upload/' . $uniqueFileName;
+
+                if (!is_dir(storage_path($dir_name))) {
+                    Storage::disk('local')->makeDirectory($dir_name);
+                }
+
+                Storage::disk('local')->put($dir_name . '/' . ($this->chunkNum + $chunk), file_get_contents($realPath));
+                if ($chunks == ($chunk + 1)) {
+                    return ['chunked' => true, 'state' => 'SUCCESS', 'ext' => $ext, 'original' => $original_name];
+                } else {
+                    return ['chunked' => true, 'state' => 'SUCCESS'];
+                }
+            }
+            //非分片上传
+            $tempArr = explode(".", $original_name);
+            $ext = end($tempArr);
+
+            if (in_array($ext, config("webuploader.extensions.image"))) {
+                $this->file_type = "images";
             }
 
-            Storage::disk('local')->put($dir_name . '/' . ($this->chunkNum + $chunk), file_get_contents($realPath));
-            if ($chunks == ($chunk + 1)) {
-                return ['chunked' => true, 'state' => 'SUCCESS', 'ext' => $ext, 'original' => $original_name];
+            if (in_array($ext, config("webuploader.extensions.video"))) {
+                $this->file_type = "videos";
+            }
+
+            if (in_array($ext, config("webuploader.extensions.attach"))) {
+                $this->file_type = "attachs";
+            }
+            $path = '/uploads/' . $this->file_type . '/' . date('Y-m-d');
+            $filename = $path . '/' . md5(uniqid()) . '.' . $ext;
+            $disk = $this->config['disk'];
+            if ($disk == "") {
+                if (!is_dir(public_path($path))) {
+                    try {
+                        mkdir(public_path($path), 0777, true);
+                    } catch (\Exception $e) {
+                        return ['state' => public_path($path) . '目录不可写'];
+                    }
+                }
+                file_put_contents(public_path($filename), file_get_contents($realPath));
             } else {
-                return ['chunked' => true, 'state' => 'SUCCESS'];
+                Storage::disk($disk)->put(ltrim($filename), file_get_contents($realPath));
             }
+            return [
+                'state' => 'SUCCESS',
+                'original_name' => $original_name,
+                'ext' => $ext,
+                'disk_name' => $disk,
+                'mime' => $file->getClientMimeType(),
+                'size' => $file->getSize(),
+                'url' => $filename,  //文件存放路径
+            ];
+
         } else {
-            return ['chunked' => false, 'state' => '文件上传失败'];
+            return $isMultiUpload ? ['chunked' => false, 'state' => '文件上传失败'] : ['state' => '文件上传失败'];
         }
     }
 
