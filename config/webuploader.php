@@ -48,4 +48,5 @@ return [
         ],
     ],
     "multi_size" => 1024 * 1024 * 2000, //2g
+    'multi_disk' => 'local',
 ];
