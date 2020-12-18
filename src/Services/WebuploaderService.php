@@ -60,8 +60,7 @@ class WebuploaderService
                 return ["exist" => 0];
             }
         } else {
-            $disk_name = "local";
-            if (!Storage::disk("local")->exists($file->path)) {
+            if (!file_exists(public_path($file->path))) {
                 File::where("hash", $data["hash"])->delete();
                 return ["exist" => 0];
             }
@@ -148,11 +147,6 @@ class WebuploaderService
 
                 Storage::disk('local')->put($dir_name . '/' . ($this->chunkNum + $chunk), file_get_contents($realPath));
                 return ['chunked' => true, 'state' => 'SUCCESS'];
-//                if ($chunks == ($chunk + 1)) {
-//                    return ['chunked' => true, 'state' => 'SUCCESS', 'ext' => $ext, 'original' => $original_name];
-//                } else {
-//                    return ['chunked' => true, 'state' => 'SUCCESS'];
-//                }
             }
             //非分片上传
             $tempArr = explode(".", $original_name);
@@ -265,14 +259,14 @@ class WebuploaderService
                 //写入表
                 $data["hash"] = $store['hash'];
                 $data["path"] = $filename;
-                $data["disk_name"] = $this->multi_disk ?: "local";
+                $data["disk_name"] = $this->multi_disk;
                 File::firstOrCreate($data);
             }
             return [
                 'state' => 'SUCCESS',
                 'original_name' => $original_name,
                 'ext' => $ext,
-                'disk_name' => $this->multi_disk ?: "local",
+                'disk_name' => $this->multi_disk,
                 'mime' => $mimetype,
                 'size' => $size,
                 'url' => $filename,  //文件存放路径
