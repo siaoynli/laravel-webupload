@@ -37,9 +37,11 @@ class  WebuploaderController extends Controller
     public function images()
     {
         $info = Upload::disk($this->disk)->do();
-        $filename = $info["url"];
+
+        if($info['state']  !="SUCCESS") return  $info;
         //如果是上传到public目录则压缩图片
         if (!$this->disk) {
+            $filename = $info["url"];
             Image::file("." . $filename)->resize()->save();
         }
         return $info;
