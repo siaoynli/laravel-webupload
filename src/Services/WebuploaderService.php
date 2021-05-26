@@ -123,7 +123,7 @@ class WebuploaderService
         if ($file->isValid()) {
             $ext = strtolower($file->getClientOriginalExtension());
 
-            $allow = !in_array($ext, config("webuploader.extensions.image")) && !in_array($ext, config("webuploader.extensions.video")) && !in_array($ext, config("webuploader.extensions.attach"));
+            $allow = !in_array($ext, config("webuploader.extensions.images")) && !in_array($ext, config("webuploader.extensions.videos")) && !in_array($ext, config("webuploader.extensions.attaches"));
 
             if ($allow) {
                 Storage::disk('local')->deleteDirectory('multipart_upload/' . $uniqueFileName);
@@ -280,15 +280,15 @@ class WebuploaderService
 
     private function getFileType($ext)
     {
-        if (in_array($ext, config("webuploader.extensions.image"))) {
+        if (in_array($ext, config("webuploader.extensions.images"))) {
             $this->file_type = "images";
         }
 
-        if (in_array($ext, config("webuploader.extensions.video"))) {
+        if (in_array($ext, config("webuploader.extensions.videos"))) {
             $this->file_type = "videos";
         }
 
-        if (in_array($ext, config("webuploader.extensions.attach"))) {
+        if (in_array($ext, config("webuploader.extensions.attaches"))) {
             $this->file_type = "attachs";
         }
 

@@ -23,20 +23,20 @@ return [
     'disk' => '',
     //分片上传限制后缀
     "extensions" => [
-        "image" => [
+        "images" => [
             "jpg",
             "jpeg",
             "png",
             "bmp",
             "gif"
         ],
-        "video" => [
+        "videos" => [
             "mp4",
             "flv",
             "mkv",
             "avi"
         ],
-        "attach" => [
+        "attaches" => [
             "zip",
             "rar",
             "doc",
