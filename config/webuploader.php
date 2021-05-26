@@ -16,6 +16,7 @@ return [
             "videos" => "webuploader/videos",
             "multi" => "webuploader/multi",
         ],
+        //["web","auth"]
         "middleware" => []
     ],
     //filesystem disks name ,如果为空，则上传到public目录
