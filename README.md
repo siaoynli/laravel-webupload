@@ -29,6 +29,11 @@ php artisan migrate
 
 3.输入http:://localhost/webuploader/demo 进行测试
 
+4.中间件
+```
+"middleware" => ["web","auth"]
+```
+
 # 说明
 
 ```
